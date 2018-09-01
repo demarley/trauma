@@ -1,0 +1,27 @@
+<use name="FWCore/Framework"/>
+<use name="FWCore/PluginManager"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/ServiceRegistry"/>
+<use name="FWCore/Utilities"/>
+<use name="PhysicsTools/UtilAlgos"/>
+<use name="CommonTools/UtilAlgos"/>
+<use name="DataFormats/Provenance"/>
+<use name="DataFormats/PatCandidates"/>
+<use name="DataFormats/L1TrackTrigger"/>
+<use name="L1Trigger/L1TMuon"/>
+<use name="L1Trigger/TrackTrigger"/>
+<use name="L1Trigger/TrackFindingTracklet"/>
+<use name="SimTracker/TrackerHitAssociation"/>
+<use name="SimTracker/TrackTriggerAssociation"/>
+<use name="FastSimulation/BaseParticlePropagator"/>
+<use name="SimGeneral/HepPDTRecord"/>
+<use name="SimDataFormats/GeneratorProducts"/>
+
+<use name="clhep"/>
+<use name="boost"/>
+<use name="eigen"/>
+<use name="LHAPDF"/>
+<use name="root"/>
+<use name="hepmc"/>
+
+<flags EDM_PLUGIN="1"/>
