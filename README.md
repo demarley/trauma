@@ -1,9 +1,9 @@
 # Trauma
 
-**Tra**ck-**μ** **M**atching with machine learning
+**Tra**ck-**μ** **Ma**tching with machine learning.
 
-Given an L1 TT Tracklet and an L1 regional muon candidate, classify the two 
-as 'matched' or 'un-matched'.
+_Given an L1 TT Tracklet and an L1 regional muon candidate, classify the two 
+as 'matched' or 'un-matched'._
 
 ## Getting Started
 
