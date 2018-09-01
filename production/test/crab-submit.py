@@ -38,7 +38,7 @@ def main(input_datasets="crab-datasets.txt"):
 
     def submit(config):
         try:
-            crabCommand('submit', config=config, dryrun=False)   # add 'dryrun=False' as argument for testing
+            crabCommand('submit', config=config, dryrun=False)
             print ' Executed crabCommand() '
         except HTTPException, hte:
             print ' ERROR :: Cannot execute command! '
@@ -65,8 +65,8 @@ def main(input_datasets="crab-datasets.txt"):
         # Data
         #config.Data.splitting    = 'Automatic'
         config.Data.splitting     = 'FileBased'
-        config.Data.unitsPerJob   = 5
-        config.Data.outLFNDirBase = '/store/user/demarley/correlator/'
+        config.Data.unitsPerJob   = 3
+        config.Data.outLFNDirBase = '/store/user/dmarley/correlator/'
         config.Data.publication   = False
         config.Data.inputDataset  = dataset
 
