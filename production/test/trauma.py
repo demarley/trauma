@@ -20,9 +20,10 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 
 
 # input
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20))
 Source_Files = cms.untracked.vstring(
-  "file:/uscms_data/d3/demarley/correlator/data/singlemuon_noPU_test.root"
+#  "file:/uscms_data/d3/demarley/correlator/data/singlemuon_noPU_test.root"
+   "/store/user/demarley/correlator/singleMuon_PU200.root"
 )
 process.source = cms.Source("PoolSource", fileNames=Source_Files,
                             inputCommands=cms.untracked.vstring(
