@@ -60,6 +60,9 @@ class miniTree {
     float m_mu_eta;
     float m_mu_phi;
     int m_mu_charge;
+    float m_tk_pt;
+    float m_tk_eta;
+    float m_tk_phi;
     float m_tk_sinheta;
     float m_tk_rinv;
     float m_tk_chi2;

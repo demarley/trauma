@@ -53,7 +53,7 @@ class histogrammer {
 
     /* Book histograms */
     virtual void initialize( TFile& outputFile, bool doSystWeights=false );
-    virtual void bookHists( std::string name );
+    virtual void bookHists();
 
   protected:
 

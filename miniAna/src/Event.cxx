@@ -26,17 +26,17 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
     m_mu_bmtf_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_bmtf_pt");
     m_mu_bmtf_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_bmtf_eta");
     m_mu_bmtf_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_bmtf_phi");
-    m_mu_bmtf_charge = new TTreeReaderValue<std::vector<int>>(m_ttree,"mu_bmtf_q");
+    m_mu_bmtf_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_bmtf_q");
 
     m_mu_omtf_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_omtf_pt");
     m_mu_omtf_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_omtf_eta");
     m_mu_omtf_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_omtf_phi");
-    m_mu_omtf_charge = new TTreeReaderValue<std::vector<int>>(m_ttree,"mu_omtf_q");
+    m_mu_omtf_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_omtf_q");
 
     m_mu_emtf_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_emtf_pt");
     m_mu_emtf_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_emtf_eta");
     m_mu_emtf_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_emtf_phi");
-    m_mu_emtf_charge = new TTreeReaderValue<std::vector<int>>(m_ttree,"mu_emtf_q");
+    m_mu_emtf_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_emtf_q");
 
     m_track_pt   = new TTreeReaderValue<std::vector<float>>(m_ttree,"trk_pt");
     m_track_eta  = new TTreeReaderValue<std::vector<float>>(m_ttree,"trk_eta");
@@ -44,7 +44,7 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
     m_track_d0   = new TTreeReaderValue<std::vector<float>>(m_ttree,"trk_z0");
     m_track_z0   = new TTreeReaderValue<std::vector<float>>(m_ttree,"trk_z0");
     m_track_chi2 = new TTreeReaderValue<std::vector<float>>(m_ttree,"trk_chi2");
-    m_track_charge  = new TTreeReaderValue<std::vector<int>>(m_ttree,"trk_charge");
+    m_track_charge  = new TTreeReaderValue<std::vector<int>>(m_ttree,"trk_q");
     m_track_nstub   = new TTreeReaderValue<std::vector<int>>(m_ttree,"trk_nstub");
     m_track_genuine = new TTreeReaderValue<std::vector<int>>(m_ttree,"trk_genuine");
     m_track_loose   = new TTreeReaderValue<std::vector<int>>(m_ttree,"trk_loose");
@@ -57,6 +57,8 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
     m_track_matchtp_phi   = new TTreeReaderValue<std::vector<float>>(m_ttree,"trk_matchtp_phi");
     m_track_matchtp_z0    = new TTreeReaderValue<std::vector<float>>(m_ttree,"trk_matchtp_z0");
     m_track_matchtp_dxy   = new TTreeReaderValue<std::vector<float>>(m_ttree,"trk_matchtp_dxy");
+
+    m_deepLearningTool = new deepLearning(cmaConfig);
 } // end constructor
 
 Event::~Event() {}
@@ -111,6 +113,10 @@ void Event::execute(Long64_t entry){
     initialize_muons();
     cma::DEBUG("EVENT : Setup muons ");
 
+    // Tracks
+    initialize_tracks();
+    cma::DEBUG("EVENT : Setup tracks ");
+
     // DNN prediction for each TkMu object
     deepLearningPrediction();
 
@@ -136,6 +142,17 @@ void Event::initialize_muons(){
         mu.OMTF   = false;
         mu.EMTF   = false;
         mu.index  = i;
+
+        // check if this muon is a duplicate of one that has already been identified
+        bool duplicate(false);
+        for (const auto& bmtf : m_bmtf_muons){
+            if (bmtf.p4.DeltaR(mu.p4) < 0.1){
+                duplicate=true;
+                break;
+            }
+        }
+        if (duplicate) continue;
+
         m_bmtf_muons.push_back(mu);
     }
 
@@ -149,6 +166,17 @@ void Event::initialize_muons(){
         mu.OMTF   = true;
         mu.EMTF   = false;
         mu.index  = i;
+
+        // check if this muon is a duplicate of one that has already been identified
+        bool duplicate(false);
+        for (const auto& omtf : m_omtf_muons){
+            if (omtf.p4.DeltaR(mu.p4) < 0.1){
+                duplicate=true;
+                break;
+            }
+        }
+        if (duplicate) continue;
+
         m_omtf_muons.push_back(mu);
     }
 
@@ -158,10 +186,21 @@ void Event::initialize_muons(){
         Muon mu;
         mu.p4.SetPtEtaPhiM( (*m_mu_emtf_pt)->at(i),(*m_mu_emtf_eta)->at(i),(*m_mu_emtf_phi)->at(i),0);
         mu.charge = (*m_mu_emtf_charge)->at(i);
-        mu.BMTF   = true;
+        mu.BMTF   = false;
         mu.OMTF   = false;
-        mu.EMTF   = false;
+        mu.EMTF   = true;
         mu.index  = i;
+
+        // check if this muon is a duplicate of one that has already been identified
+        bool duplicate(false);
+        for (const auto& emtf : m_emtf_muons){
+            if (emtf.p4.DeltaR(mu.p4) < 0.1){
+                duplicate=true;
+                break;
+            }
+        }
+        if (duplicate) continue;
+
         m_emtf_muons.push_back(mu);
     }
 
@@ -242,8 +281,10 @@ void Event::deepLearningPrediction(){
             }
             else if (m_DNNinference){
                 m_deepLearningTool->inference(tk,mu);
+                trkmuon.features = m_deepLearningTool->features();
                 trkmuon.dnn = m_deepLearningTool->prediction();
             }
+
             m_tkmuons.push_back( trkmuon );
         } // end loop over muons
     } // end loop over tracks

@@ -41,6 +41,9 @@ void miniTree::initialize(TFile& outputFile) {
     m_ttree->Branch( "mu_phi",    &m_mu_phi, "mu_phi/F" );
     m_ttree->Branch( "mu_charge", &m_mu_charge, "mu_charge/F" );
 
+    m_ttree->Branch( "tk_pt",      &m_tk_pt,      "tk_pt/F" );
+    m_ttree->Branch( "tk_eta",     &m_tk_eta,     "tk_eta/F" );
+    m_ttree->Branch( "tk_phi",     &m_tk_phi,     "tk_phi/F" );
     m_ttree->Branch( "tk_sinheta", &m_tk_sinheta, "tk_sinheta/F" );
     m_ttree->Branch( "tk_rinv",    &m_tk_rinv,    "tk_rinv/F" );
     m_ttree->Branch( "tk_chi2",    &m_tk_chi2,    "tk_chi2/F" );
@@ -73,6 +76,9 @@ void miniTree::saveEvent(const std::map<std::string,double> features) {
     m_mu_phi = features.at("mu_phi");
     m_mu_charge = features.at("mu_charge");
 
+    m_tk_pt      = features.at("tk_pt");
+    m_tk_eta     = features.at("tk_eta");
+    m_tk_phi     = features.at("tk_phi");
     m_tk_sinheta = features.at("tk_sinheta");
     m_tk_rinv    = features.at("tk_rinv");
     m_tk_chi2    = features.at("tk_chi2");

@@ -86,22 +86,15 @@ void configuration::initialize() {
 
 
     // Get the absolute path to leopard for loading
-    char* cma_path = getenv("LEOPARDDIR");
-    if (cma_path==NULL){
-        cma::WARNING("CONFIG : environment variable " );
-        cma::WARNING("CONFIG :    'LEOPARDDIR' " );
-        cma::WARNING("CONFIG : is not set.  Using PWD to set path." );
-        cma::WARNING("CONFIG : This may cause problems submitting batch jobs." );
-        cma_path = getenv("PWD");
-    }
+    char* cma_path = getenv("PWD");
     m_cma_absPath = cma_path;
     cma::DEBUG("CONFIG : path set to: "+m_cma_absPath );
 
     // Assign values
     m_DNNtraining      = cma::str2bool( getConfigOption("DNNtraining") );
     m_DNNinference     = cma::str2bool( getConfigOption("DNNinference") );
-    m_dnnFile          = getConfigOption("dnnFile");
-    m_dnnKey           = getConfigOption("dnnKey");
+    m_dnnFile          = getConfigOption("DNNfile");
+    m_dnnKey           = getConfigOption("DNNkey");
     m_nEventsToProcess = std::stoi(getConfigOption("NEvents"));
     m_firstEvent       = std::stoi(getConfigOption("firstEvent"));
     m_selection        = getConfigOption("selection");

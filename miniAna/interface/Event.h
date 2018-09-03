@@ -104,19 +104,19 @@ class Event {
     TTreeReaderValue<std::vector<float>> * m_mu_bmtf_eta;
     TTreeReaderValue<std::vector<float>> * m_mu_bmtf_phi;
     TTreeReaderValue<std::vector<float>> * m_mu_bmtf_e;
-    TTreeReaderValue<std::vector<int>> * m_mu_bmtf_charge;
+    TTreeReaderValue<std::vector<float>> * m_mu_bmtf_charge;
 
     TTreeReaderValue<std::vector<float>> * m_mu_omtf_pt;
     TTreeReaderValue<std::vector<float>> * m_mu_omtf_eta;
     TTreeReaderValue<std::vector<float>> * m_mu_omtf_phi;
     TTreeReaderValue<std::vector<float>> * m_mu_omtf_e;
-    TTreeReaderValue<std::vector<int>> * m_mu_omtf_charge;
+    TTreeReaderValue<std::vector<float>> * m_mu_omtf_charge;
 
     TTreeReaderValue<std::vector<float>> * m_mu_emtf_pt;
     TTreeReaderValue<std::vector<float>> * m_mu_emtf_eta;
     TTreeReaderValue<std::vector<float>> * m_mu_emtf_phi;
     TTreeReaderValue<std::vector<float>> * m_mu_emtf_e;
-    TTreeReaderValue<std::vector<int>> * m_mu_emtf_charge;
+    TTreeReaderValue<std::vector<float>> * m_mu_emtf_charge;
 
     // TTTrack info
     TTreeReaderValue<std::vector<float>> * m_track_pt;

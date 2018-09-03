@@ -1,0 +1,10 @@
+makeHistograms true
+selection training
+output_path ./
+cutsfile config/cuts_training.txt
+inputfile config/listOfFiles.txt
+treename tree/training
+DNNtraining true
+firstEvent 0
+NEvents 100
+verboseLevel INFO

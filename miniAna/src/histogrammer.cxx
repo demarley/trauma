@@ -69,11 +69,11 @@ void histogrammer::initialize( TFile& outputFile, bool doSystWeights ){
     /* Setup some values and book histograms */
     m_doSystWeights = doSystWeights;
     outputFile.cd();
-    bookHists( m_name );
+    bookHists();
     return;
 }
 
-void histogrammer::bookHists( std::string name ){
+void histogrammer::bookHists(){
     /* 
       Book histograms -- modify/inherit this function for analysis-specific hists 
 
@@ -81,11 +81,27 @@ void histogrammer::bookHists( std::string name ){
     */
     m_names.resize(0); // append names to this to keep track of later
 
-    cma::DEBUG("HISTOGRAMMER : Init. histograms: "+name);
+    cma::DEBUG("HISTOGRAMMER : Init. histograms: "+m_name);
 
     // features for DNN
     for (unsigned int x=0, size=2; x<size; x++){
         std::string target = std::to_string(x);
+
+        init_hist( "mu_pt_"+target+"_"+m_name,  500,0,500);
+        init_hist( "mu_eta_"+target+"_"+m_name, 50,-2.5,2.5);
+        init_hist( "mu_phi_"+target+"_"+m_name, 64,-3.2,3.2);
+        init_hist( "mu_charge_"+target+"_"+m_name, 3,-1.5,1.5);
+
+        init_hist( "tk_pt_"+target+"_"+m_name,       500,0,500);
+        init_hist( "tk_eta_"+target+"_"+m_name,      50,-2.5,2.5);
+        init_hist( "tk_phi_"+target+"_"+m_name,     64,-3.2,3.2);
+        init_hist( "tk_sinheta_"+target+"_"+m_name, 200,-10,10);
+        init_hist( "tk_rinv_"+target+"_"+m_name,   2000,  0,1);
+        init_hist( "tk_z0_"+target+"_"+m_name,      600,-30,30);
+        init_hist( "tk_d0_"+target+"_"+m_name,      200,-20,20);
+        init_hist( "tk_charge_"+target+"_"+m_name,   3,-1.5,1.5);
+
+        init_hist( "tkmu_deltaR2_"+target+"_"+m_name, 100,0,2);
     }
 
     return;
@@ -115,6 +131,22 @@ void histogrammer::fill( const std::map<std::string,double> features, double wei
     cma::DEBUG("HISTOGRAMMER : Fill histograms: "+m_name+".");
 
     std::string target = std::to_string( int(features.at("target")) );
+
+    fill( "mu_pt_"+target+"_"+m_name, features.at("mu_pt"), weight);
+    fill( "mu_eta_"+target+"_"+m_name, features.at("mu_eta"), weight);
+    fill( "mu_phi_"+target+"_"+m_name, features.at("mu_phi"), weight);
+    fill( "mu_charge_"+target+"_"+m_name, features.at("mu_charge"), weight);
+
+    fill( "tk_pt_"+target+"_"+m_name,     features.at("tk_pt"), weight);
+    fill( "tk_eta_"+target+"_"+m_name,    features.at("tk_eta"), weight);
+    fill( "tk_phi_"+target+"_"+m_name,    features.at("tk_phi"), weight);
+    fill( "tk_sinheta_"+target+"_"+m_name,features.at("tk_sinheta"), weight);
+    fill( "tk_rinv_"+target+"_"+m_name,   features.at("tk_rinv"), weight);
+    fill( "tk_z0_"+target+"_"+m_name,     features.at("tk_z0"), weight);
+    fill( "tk_d0_"+target+"_"+m_name,     features.at("tk_d0"), weight);
+    fill( "tk_charge_"+target+"_"+m_name, features.at("tk_charge"), weight);
+
+    fill( "tkmu_deltaR2_"+target+"_"+m_name, features.at("tkmu_deltaR2"), weight);
 
     cma::DEBUG("HISTOGRAMMER : End histograms");
 

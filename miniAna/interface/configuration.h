@@ -89,6 +89,10 @@ class configuration {
 
 
     std::map<std::string,std::string> m_defaultConfigs = {
+             {"DNNtraining",           "false"},
+             {"DNNinference",          "false"},
+             {"DNNfile",               ""},
+             {"DNNkey",                "dnn"},
              {"makeHistograms",        "true"},
              {"NEvents",               "-1"},
              {"firstEvent",            "0"},

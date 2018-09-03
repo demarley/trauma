@@ -16,6 +16,8 @@ deepLearning::deepLearning( configuration& cmaConfig ) :
   m_config(&cmaConfig),
   m_lwnn(nullptr),
   m_dnnKey(""){
+    m_features.clear();
+
     if (m_config->DNNinference()){
         // Setup lwtnn
         std::ifstream input_cfg = cma::open_file( m_config->dnnFile() );
@@ -34,6 +36,7 @@ void deepLearning::training(const Track& tk, const Muon& mu){
     /* Prepare inputs for training */
     m_track = tk;
     m_muon  = mu;
+    cma::DEBUG("DL : Load features for training");
     loadFeatures();
     return;
 }
@@ -56,30 +59,37 @@ void deepLearning::loadFeatures(){
 
     // feature calculations
     // if matched at gen-level, target = 1 else 0
-    unsigned int target(0);
-    if (fabs(m_track.matchtp_pdgid)==13){
+    double target(0);
+    if (std::abs(m_track.matchtp_pdgid)==13){
         target = 1;
     }
 
+    cma::DEBUG("DL : Load features ");
     m_features["target"] = target;
 
+    cma::DEBUG("DL : -> muon features ");
     // pt,eta,phi
     // sinh(eta),Rinv,chi2,z0,d0,nstubs  // stub pt consistency (?)
     // deltaR2 (DeltaR ** 2)
     m_features["mu_pt"]  = m_muon.p4.Pt();
     m_features["mu_eta"] = m_muon.p4.Eta();
     m_features["mu_phi"] = m_muon.p4.Phi();
-    m_features["mu_charge"] = m_muon.charge;
+    m_features["mu_charge"] = m_muon.charge*1.;
 
+    cma::DEBUG("DL : -> track features ");
+    m_features["tk_pt"]      = m_track.p4.Pt();
+    m_features["tk_eta"]     = m_track.p4.Eta();
+    m_features["tk_phi"]     = m_track.p4.Phi();
     m_features["tk_sinheta"] = sinh(m_track.p4.Eta());
-    m_features["tk_Rinv"]    = 0.0114/m_track.p4.Pt();      // Rinv = (0.3*3.8/100.0)/pT
+    m_features["tk_rinv"]    = 0.0114/m_track.p4.Pt();      // Rinv = (0.3*3.8/100.0)/pT
     m_features["tk_chi2"]    = m_track.chi2;
     m_features["tk_z0"]      = m_track.z0;
     m_features["tk_d0"]      = m_track.d0;
-    m_features["tk_charge"]  = m_track.charge;
+    m_features["tk_charge"]  = m_track.charge*1.;
 //    m_features["tk_nstubs"]  = m_track.nstubs;            // accessible in firmware?
 //    m_features["tk_stubPtConsistency"] = m_track.stubPtConsistency;  // not saved in first set of samples >:|
 
+    cma::DEBUG("DL : -> track-muon features ");
     m_features["tkmu_deltaR2"] = pow((m_muon.p4.DeltaR( m_track.p4 )),2);  // accessible in firmware
 
     m_features["weight"] = 1.;
