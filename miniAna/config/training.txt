@@ -6,5 +6,5 @@ inputfile config/listOfFiles.txt
 treename tree/training
 DNNtraining true
 firstEvent 0
-NEvents 100
+NEvents -1
 verboseLevel INFO

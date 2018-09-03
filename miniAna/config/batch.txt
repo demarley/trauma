@@ -1,5 +1,5 @@
-eos_path /store/user/demarley/correlator/trauma/flatNtuples/singlemuon-nopu
-subdir singlemuon-nopu
+eos_path /store/user/demarley/correlator/trauma/flatNtuples/singlemuon-pu140
+subdir singlemuon-pu140
 eos_tarball_path /store/user/demarley/correlator/trauma/flatNtuples/
 date today
 output_dir eos
@@ -9,4 +9,4 @@ test False
 submit True
 verbose True
 config config/training.txt
-files config/listOfFiles.txt
+files config/listOfSingleMuon_PU140.txt

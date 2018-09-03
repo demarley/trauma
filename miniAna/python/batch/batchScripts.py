@@ -23,13 +23,13 @@ tar -xf %(cmsRelease)s.tgz
 rm %(cmsRelease)s.tgz
 
 ## copy transferred data in batch directory (only need 3 files)
-if (! -d %(cmsRelease)s/src/Analysis/leopard/%(unique_id_batch_path)s/ ) then
-    mkdir -p %(cmsRelease)s/src/Analysis/leopard/%(unique_id_batch_path)s/
+if (! -d %(cmsRelease)s/src/trauma/miniAna/%(unique_id_batch_path)s/ ) then
+    mkdir -p %(cmsRelease)s/src/trauma/miniAna/%(unique_id_batch_path)s/
 endif
 
-mv cmaConfig.txt %(cmsRelease)s/src/Analysis/leopard/%(unique_id_batch_path)s/
-mv listOfFiles.txt %(cmsRelease)s/src/Analysis/leopard/%(unique_id_batch_path)s/
-mv run_condor.sh %(cmsRelease)s/src/Analysis/leopard/%(unique_id_batch_path)s/
+mv cmaConfig.txt %(cmsRelease)s/src/trauma/miniAna/%(unique_id_batch_path)s/
+mv listOfFiles.txt %(cmsRelease)s/src/trauma/miniAna/%(unique_id_batch_path)s/
+mv run_condor.sh %(cmsRelease)s/src/trauma/miniAna/%(unique_id_batch_path)s/
 
 ## Setup CMSSW environment
 setenv SCRAM_ARCH slc6_amd64_gcc530
@@ -40,7 +40,7 @@ scram b -j8
 
 
 ## Execute leopard
-cd Analysis/leopard
+cd trauma/miniAna
 
 echo " > Run the program "
 %(executable)s %(cfg_filename)s
