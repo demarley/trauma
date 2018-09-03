@@ -1,0 +1,12 @@
+eos_path /store/user/demarley/correlator/trauma/flatNtuples/singlemuon-nopu
+subdir singlemuon-nopu
+eos_tarball_path /store/user/demarley/correlator/trauma/flatNtuples/
+date today
+output_dir eos
+username demarley
+executable training
+test False
+submit True
+verbose True
+config config/training.txt
+files config/listOfFiles.txt

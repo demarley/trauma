@@ -1,0 +1,8 @@
+<use   name="boost"/>
+<use   name="eigen"/>
+<use   name="root"/>
+<use   name="rootMinuit"/>
+
+<export>
+  <lib   name="1"/>
+</export>

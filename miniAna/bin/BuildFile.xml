@@ -1,0 +1,12 @@
+<use   name="trauma/miniAna"/>
+<use   name="lwtnn/lwtnn"/>
+<use   name="rootphysics"/>
+<use   name="rootgraphics"/>
+<use   name="root"/>
+
+<bin   name="training" file="training.cxx">
+</bin>
+
+
+<Flags CXXFLAGS="-lTreePlayer -fopenmp -Wno-error=unused-but-set-variable -Wno-error=unused-variable -Wno-error=maybe-uninitialized"/>
+<!--  some things appear as errors that shouldn't (or I don't see a way to 'fix' them) -->
