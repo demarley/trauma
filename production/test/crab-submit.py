@@ -9,7 +9,7 @@ To run:
   python crab-submit-multiple.py <datasets>
 
 where <datasets> is a text file that contains the datasets you want to process.
-See 'test/crab-datasets-mc.txt' for an example.
+See 'test/crab-singlemuon.txt' for an example.
 If no argument is provided, a default option is selected
 """
 import os
@@ -25,7 +25,7 @@ def file2list(filename):
     return listOfFiles
 
 
-def main(input_datasets="crab-datasets.txt"):
+def main(input_datasets="crab-singlemuon.txt"):
 
     from CRABClient.UserUtilities import config
     config = config()
@@ -65,7 +65,7 @@ def main(input_datasets="crab-datasets.txt"):
         # Data
         #config.Data.splitting    = 'Automatic'
         config.Data.splitting     = 'FileBased'
-        config.Data.unitsPerJob   = 3
+        config.Data.unitsPerJob   = 2
         config.Data.outLFNDirBase = '/store/user/dmarley/correlator/'
         config.Data.publication   = False
         config.Data.inputDataset  = dataset
