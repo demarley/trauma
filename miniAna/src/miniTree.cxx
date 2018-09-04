@@ -39,7 +39,7 @@ void miniTree::initialize(TFile& outputFile) {
     m_ttree->Branch( "mu_pt",     &m_mu_pt,  "mu_pt/F" );
     m_ttree->Branch( "mu_eta",    &m_mu_eta, "mu_eta/F" );
     m_ttree->Branch( "mu_phi",    &m_mu_phi, "mu_phi/F" );
-    m_ttree->Branch( "mu_charge", &m_mu_charge, "mu_charge/F" );
+    m_ttree->Branch( "mu_charge", &m_mu_charge, "mu_charge/I" );
 
     m_ttree->Branch( "tk_pt",      &m_tk_pt,      "tk_pt/F" );
     m_ttree->Branch( "tk_eta",     &m_tk_eta,     "tk_eta/F" );
@@ -49,7 +49,7 @@ void miniTree::initialize(TFile& outputFile) {
     m_ttree->Branch( "tk_chi2",    &m_tk_chi2,    "tk_chi2/F" );
     m_ttree->Branch( "tk_z0",      &m_tk_z0,      "tk_z0/F" );
     m_ttree->Branch( "tk_d0",      &m_tk_d0,      "tk_d0/F" );
-    m_ttree->Branch( "tk_charge",  &m_tk_charge,  "tk_charge/F" );
+    m_ttree->Branch( "tk_charge",  &m_tk_charge,  "tk_charge/I" );
 //    m_ttree->Branch( "tk_stubPtConsistency",     &m_tk_stubPtConsistency,  "tk_stubPtConsistency/F" );
 
     m_ttree->Branch( "tkmu_deltaR2", &m_tkmu_deltaR2,  "tkmu_deltaR2/F" );
@@ -74,7 +74,7 @@ void miniTree::saveEvent(const std::map<std::string,double> features) {
     m_mu_pt  = features.at("mu_pt");
     m_mu_eta = features.at("mu_eta");
     m_mu_phi = features.at("mu_phi");
-    m_mu_charge = features.at("mu_charge");
+    m_mu_charge = boost::math::round( features.at("mu_charge") );
 
     m_tk_pt      = features.at("tk_pt");
     m_tk_eta     = features.at("tk_eta");
@@ -84,7 +84,7 @@ void miniTree::saveEvent(const std::map<std::string,double> features) {
     m_tk_chi2    = features.at("tk_chi2");
     m_tk_z0      = features.at("tk_z0");
     m_tk_d0      = features.at("tk_d0");
-    m_tk_charge  = features.at("tk_charge");
+    m_tk_charge  = boost::math::round( features.at("tk_charge") );
     //m_tk_stubPtConsistency;
 
     m_tkmu_deltaR2 = features.at("tkmu_deltaR2");

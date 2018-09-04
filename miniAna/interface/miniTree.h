@@ -11,6 +11,7 @@
 #include "TTreeReaderValue.h"
 #include "TTreeReaderArray.h"
 
+#include <boost/math/special_functions/round.hpp>
 #include <memory>
 #include <set>
 #include <list>
