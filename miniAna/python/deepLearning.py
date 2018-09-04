@@ -1,4 +1,3 @@
-
 """
 Created:        11 November  2016
 Last Updated:   15 February  2018
@@ -33,9 +32,10 @@ import json
 import util
 import datetime
 
+from deepLearningPlotter import DeepLearningPlotter
+
+import ROOT
 import uproot
-import matplotlib
-matplotlib.use('Agg')
 import numpy as np
 import pandas as pd
 
@@ -44,9 +44,9 @@ from keras.models import Sequential,model_from_json,load_model
 from keras.layers import Dense, Activation
 from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
-from sklearn.model_selection import train_test_split,StratifiedKFold
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve, auc
-from deepLearningPlotter import DeepLearningPlotter
+from sklearn.multiclass import OneVsRestClassifier
 
 
 # fix random seed for reproducibility
@@ -95,9 +95,9 @@ class DeepLearning(object):
         self.output_dim = 1                  # number of output dimensions (# of categories/# of predictions for regression)
         self.batch_size = 32
         self.activations   = ['elu']         # https://keras.io/activations/
-        self.kfold_splits  = 2
         self.nHiddenLayers = 1
         self.earlystopping = {}              # {'monitor':'loss','min_delta':0.0001,'patience':5,'mode':'auto'}
+        self.targets = {"bckg":0,"signal":1}
 
 
     def initialize(self):   #,config):
@@ -107,9 +107,6 @@ class DeepLearning(object):
         self.msg_svc.initialize()
         self.verbose = not self.msg_svc.compare(self.verbose_level,"WARNING") # verbose if level is <"WARNING"
 
-        # Set name for the model, if needed
-        if not self.model_name:
-            self.model_name = self.hep_data.split('/')[-1].split('.')[0]+'_'+self.date
 
         # initialize empty dictionaries, lists
         self.test_data  = {'X':[],'Y':[]}
@@ -120,7 +117,7 @@ class DeepLearning(object):
         self.fpr = []  # false positive rate
         self.tpr = []  # true positive rate
         self.histories  = []
-
+        if not self.model_name:  self.model_name = self.hep_data.split('/')[-1].split('.')[0]+'_'+self.date
 
         ## -- Plotting framework
         print " >> Store output in ",self.output_dir
@@ -153,32 +150,22 @@ class DeepLearning(object):
         return
 
 
-    ## Single functions to run all of the necessary pieces
-    def runTraining(self):
+    def training(self):
         """Train NN model"""
         self.load_hep_data()
         self.build_model()
 
-        # hard-coded :/
-        target_names  = ["multijet","QB","W"]
-        target_values = [0,1,2]
-        self.plotter.initialize(self.df,target_names,target_values)
+        if self.runDiagnostics: self.diagnostics(pre=True)
 
-        if self.runDiagnostics:
-            self.diagnostics(preTraining=True)     # save plots of the features and model architecture
+        self.train_model()      # this also saves the model in case errors occur while plotting evaluations
 
-        self.train_model()
-
-        self.msg_svc.INFO(" SAVE MODEL")
-        self.save_model(self.useLWTNN)
-
-        if self.runDiagnostics:
-            self.diagnostics(postTraining=True)    # save plots of the performance in training/testing
+        # save plots of the performance
+        if self.runDiagnostics: self.diagnostics(post=True)
 
         return
 
 
-    def runInference(self,data=None):
+    def inference(self,data=None):
         """
         Run inference of the NN model
         User responsible for diagnostics if not doing training: 
@@ -220,6 +207,7 @@ class DeepLearning(object):
             self.model.add( Dense( int(self.nNodes[h+1]), kernel_initializer=self.init, activation=self.activations[h+1]) )
 
         ## Add the output layer
+        print self.output_dim
         self.model.add( Dense(self.output_dim,kernel_initializer=self.init, activation=self.activations[-1]) )
 
         ## Build the model
@@ -233,88 +221,51 @@ class DeepLearning(object):
         """Setup for training the model using k-fold cross-validation"""
         self.msg_svc.INFO("DL : Train the model!")
 
-        callbacks_list = []
-        if self.earlystopping:
-            earlystop = EarlyStopping(**self.earlystopping)
-            callbacks_list = [earlystop]
+        X_train = self.df[self.features].values  # self.df[self.features].values
+        Y_train = self.df['target'].values       # self.df['target'].values
 
-        ttbar1 = self.df[ self.df['target']==1 ]
-        ttbar2 = self.df[ self.df['target']==2 ]
+        X_train,X_test,Y_train,Y_test = train_test_split(X_train,Y_train,test_size=0.3) # split into train/test
 
-        qcd    = self.df[ self.df['target']==0 ]
-        qcd    = qcd.sample(frac=1)[0:ttbar1.shape[0]]   # equal statistics (shuffle QCD entries first)
+        print X_train.shape, Y_train.shape
 
-        training_df = pd.concat( [qcd,ttbar1,ttbar2] )  # re-combine into dataframe
-        training_df = training_df.sample(frac=1)         # shuffle entries
-
-        X = training_df[self.features].values  # self.df[self.features].values
-        Y = training_df['target'].values       # self.df['target'].values
-
-        kfold = StratifiedKFold(n_splits=self.kfold_splits, shuffle=True, random_state=seed)
-        nsplits = kfold.get_n_splits(X,Y)
-        cvpredictions = []                 # compare outputs from each cross-validation
-
-        self.msg_svc.INFO("DL :   Fitting K-Fold cross validation".format(self.kfold_splits))
-        for ind,(train,test) in enumerate(kfold.split(X,Y)):
-            self.msg_svc.DEBUG("DL :   - Fitting K-Fold {0}".format(ind))
-
-            Y_train = Y[train]
-            Y_test  = Y[test]
-
-            # - Adjust shape of true values (matrix for multiple outputs)
-            if self.dnn_method=='multi' or self.dnn_method=='regression' and not np.array_equal(Y_train,(Y_train[0],self.output_dim)):
-                train_shape = Y_train.shape[0]
-                train_total_array = []
-                test_shape = Y_test.shape[0]
-                test_total_array = []
-
-                for a in range(self.output_dim):
-                    dummy_train = np.zeros(train_shape)
-                    dummy_train[Y_train==a] = 1
-                    train_total_array.append( dummy_train.tolist() )
-
-                    dummy_test = np.zeros(test_shape)
-                    dummy_test[Y_test==a] = 1
-                    test_total_array.append( dummy_test.tolist() )
-                Y_train = np.array(train_total_array).T
-                Y_test  = np.array(test_total_array).T
+        ## Fit the model to training data & save the history
+        callbacks_list = [] if not self.earlystopping else [EarlyStopping(**self.earlystopping)]
+        history = self.model.fit(X_train,Y_train,epochs=self.epochs,validation_split=0.25,\
+                                 callbacks=callbacks_list,batch_size=self.batch_size,verbose=self.verbose)
+        self.histories = history
 
 
-            # -- store test/train data from each k-fold to compare later
-            self.test_data['X'].append(X[test])
-            self.test_data['Y'].append(Y_test)
-            self.train_data['X'].append(X[train])
-            self.train_data['Y'].append(Y_train)
-
-            ## Fit the model to training data & save the history
-            history = self.model.fit(X[train],Y_train,epochs=self.epochs,\
-                                     callbacks=callbacks_list,batch_size=self.batch_size,verbose=self.verbose)
-            self.histories.append(history)
+        # save the model
+        self.msg_svc.INFO(" SAVE MODEL")
+        self.save_model(self.useLWTNN)
 
 
-            # evaluate the model
-            self.msg_svc.DEBUG("DL :     + Evaluate the model: ")
-            predictions = self.model.evaluate(X[test], Y_test,verbose=self.verbose,batch_size=self.batch_size)
-            cvpredictions.append(predictions[1] * 100)
-            self.msg_svc.DEBUG("DL :       {0}: {1:.2f}%".format(self.model.metrics_names[1], predictions[1]*100))
+        # evaluate the model
+        self.msg_svc.DEBUG("DL :     + Evaluate the model: ")
+        train_predictions = self.predict(X_train)
 
-            # Evaluate training sample
-            train_predictions = self.predict(X[train])
-            self.train_predictions.append( train_predictions )
+        # Evaluate test sample
+        test_predictions  = self.predict(X_test)
 
-            # Evaluate test sample
-            test_predictions  = self.predict(X[test])
-            self.test_predictions.append( test_predictions )
+        # Make ROC curve from test sample
+        fpr,tpr,_ = roc_curve( Y_test, test_predictions )
+        self.fpr.append(fpr)
+        self.tpr.append(tpr)
 
-            # Make ROC curve from test sample
-            if self.dnn_method=='binary':
-                fpr,tpr,_ = roc_curve( Y[test], test_predictions )
-                self.fpr.append(fpr)
-                self.tpr.append(tpr)
+        # -- store test/train data from each k-fold as histograms (to compare later)
+        h_tests  = dict( (n,ROOT.TH1D("test_"+n,"test_"+n,10,0,1)) for n,v in self.targets.iteritems() )
+        h_trains = dict( (n,ROOT.TH1D("train_"+n,"train_"+n,10,0,1)) for n,v in self.targets.iteritems() )
 
-        self.msg_svc.INFO("DL :   Finished K-Fold cross-validation: ")
-        self.accuracy = {'mean':np.mean(cvpredictions),'std':np.std(cvpredictions)}
-        self.msg_svc.INFO("DL :   - Accuracy: {0:.2f}% (+/- {1:.2f}%)".format(np.mean(cvpredictions), np.std(cvpredictions)))
+        # fill histogram for each target
+        for (n,v) in self.targets.iteritems():
+            [h_tests[n].Fill(i)  for i in test_predictions[np.where(Y_test==v)]]
+            [h_trains[n].Fill(i) for i in train_predictions[np.where(Y_train==v)]]
+
+        # Plot the predictions to compare test/train
+        self.msg_svc.INFO("DL : Plot the train/test predictions")
+        self.plotter.prediction(h_trains,h_tests)   # compare DNN prediction for different targets
+
+        self.msg_svc.INFO("DL :   Finished fitting model ")
 
         return
 
@@ -337,16 +288,38 @@ class DeepLearning(object):
         @param variables2plot    If there are extra variables to plot, 
                                  that aren't features of the NN, include them here
         """
-        file    = uproot.open(self.hep_data)
-        data    = file[self.treename]
-        self.df = data.pandas.df( self.features+['target']+variables2plot )
+        self.msg_svc.INFO("DL : Load HEP data")
+        file = uproot.open(self.hep_data)
+        data = file[self.treename]
+        df   = data.pandas.df( self.features+['target']+variables2plot )
 
         self.metadata = file['metadata']   # names of samples, target values, etc.
+
+        # Make the dataset sizes equal (trim away some background)
+        fraction = 1
+        target_dfs = []
+        for k,v in self.targets.iteritems():
+            tmp = df[ df.target==v ]
+            target_dfs.append(tmp)
+
+        # Find minimum size, shuffle entries
+        min_size = min( [k.shape[0] for k in target_dfs] )
+        for td,target_df in enumerate(target_dfs):
+            # shuffle entries and select first events up to 'min_size'
+            if target_df.shape[0]>min_size:
+                target_dfs[td] = target_dfs[td].sample(frac=1)[0:min_size]
+
+        self.df = pd.concat( target_dfs )     # re-combine into single dataframe
+        self.df = self.df.sample(frac=1)  # shuffle entries
+
+        # set up plotter and save plots of the features and model architecture
+        self.plotter.initialize(self.df,self.targets)
+        if self.runDiagnostics: self.diagnostics(pre=True)
 
         return
 
 
-    def load_model(self,from_lwtnn=False):
+    def load_model(self,from_lwtnn=True):
         """Load existing model to make plots or predictions"""
         self.model = None
 
@@ -361,7 +334,7 @@ class DeepLearning(object):
         return
 
 
-    def save_model(self,to_lwtnn=False):
+    def save_model(self,to_lwtnn=True):
         """Save the model for use later"""
         output = self.output_dir+'/'+self.model_name
 
@@ -412,27 +385,22 @@ class DeepLearning(object):
         return
 
 
-    def diagnostics(self,preTraining=False,postTraining=False):
+    def diagnostics(self,pre=False,post=False):
         """Diagnostic tests of the NN"""
 
         self.msg_svc.INFO("DL : Diagnostics")
 
         # Diagnostics before the training
-        if preTraining:
+        if pre:
             self.msg_svc.INFO("DL : -- pre-training")
-            self.plotter.features()                   # compare features for different targets
-            self.plotter.feature_correlations()       # correlations of features
-            self.plotter.model(self.model,self.model_name) # Keras plot of the model architecture
+            print ' features '
+            self.plotter.features()          # compare features for different targets
+            print ' correlations '
+            self.plotter.correlation()       # correlations of features
+            self.plotter.separation()        # separatiions between classes for features
 
         # post training/testing
-        if postTraining:
-            self.msg_svc.INFO("DL : -- post-training")
-
-            self.msg_svc.INFO("DL : -- post-training :: PREDICTIONS ")
-            train = {'X':self.train_predictions,'Y':self.train_data['Y']}
-            test  = {'X':self.test_predictions,'Y':self.test_data['Y']}
-            self.plotter.prediction(train,test)   # compare DNN prediction for different targets
-
+        if post:
             self.msg_svc.INFO("DL : -- post-training :: ROC")
             self.plotter.ROC(self.fpr,self.tpr,self.accuracy)  # ROC curve for signal vs background
             self.msg_svc.INFO("DL : -- post-training :: History")
