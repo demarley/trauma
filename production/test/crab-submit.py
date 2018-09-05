@@ -66,7 +66,7 @@ def main(input_datasets="crab-singlemuon.txt"):
         #config.Data.splitting    = 'Automatic'
         config.Data.splitting     = 'FileBased'
         config.Data.unitsPerJob   = 2
-        config.Data.outLFNDirBase = '/store/user/dmarley/correlator/'
+        config.Data.outLFNDirBase = '/store/user/dmarley/correlator/trauma/production/'
         config.Data.publication   = False
         config.Data.inputDataset  = dataset
 

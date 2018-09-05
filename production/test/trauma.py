@@ -1,7 +1,7 @@
 # define basic process
 import FWCore.ParameterSet.Config as cms
 import os
-process = cms.Process("L1Tracklet")
+process = cms.Process("L1TkMu")
  
 
 # import standard configurations
