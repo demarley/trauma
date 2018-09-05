@@ -125,15 +125,11 @@ private:
   edm::InputTag omtfInputTag;
   edm::InputTag emtfInputTag;
 
-//  const edm::EDGetTokenT< l1t::RegionalMuonCandBxCollection > m_bmtfToken;
-//  const edm::EDGetTokenT< l1t::RegionalMuonCandBxCollection > m_omtfToken;
-//  const edm::EDGetTokenT< l1t::RegionalMuonCandBxCollection > m_emtfToken;
   edm::EDGetToken m_bmtfToken;
   edm::EDGetToken m_omtfToken;
   edm::EDGetToken m_emtfToken;
 
   edm::EDGetTokenT<std::vector<reco::GenParticle>> t_genEvtInfoProd;
-
 
   std::vector<unsigned int> m_goodIDs = {6,15,23,24,25};
 
@@ -147,6 +143,7 @@ private:
   std::vector<float> m_trk_d0;           // (filled if L1Tk_nPar==5, else -999)
   std::vector<float> m_trk_z0;
   std::vector<float> m_trk_chi2; 
+  std::vector<float> m_trk_stubPtCons;
   std::vector<int>   m_trk_q;
   std::vector<int>   m_trk_nstub;
   std::vector<int>   m_trk_seed;
@@ -165,15 +162,15 @@ private:
   std::vector<float> m_mu_bmtf_pt;
   std::vector<float> m_mu_bmtf_eta;
   std::vector<float> m_mu_bmtf_phi;
-  std::vector<float> m_mu_bmtf_q;
+  std::vector<int> m_mu_bmtf_q;
   std::vector<float> m_mu_omtf_pt;
   std::vector<float> m_mu_omtf_eta;
   std::vector<float> m_mu_omtf_phi;
-  std::vector<float> m_mu_omtf_q;
+  std::vector<int> m_mu_omtf_q;
   std::vector<float> m_mu_emtf_pt;
   std::vector<float> m_mu_emtf_eta;
   std::vector<float> m_mu_emtf_phi;
-  std::vector<float> m_mu_emtf_q;
+  std::vector<int> m_mu_emtf_q;
 
   std::vector<float> m_mc_pt;
   std::vector<float> m_mc_eta;

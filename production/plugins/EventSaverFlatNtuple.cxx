@@ -78,6 +78,7 @@ void EventSaverFlatNtuple::beginJob(){
     eventTree->Branch("trk_q",     &m_trk_q);
     eventTree->Branch("trk_chi2",  &m_trk_chi2);
     eventTree->Branch("trk_nstub", &m_trk_nstub);
+    eventTree->Branch("trk_stubPtCons",   &m_trk_stubPtCons);
     eventTree->Branch("trk_genuine",      &m_trk_genuine);
     eventTree->Branch("trk_loose",        &m_trk_loose);
     eventTree->Branch("trk_unknown",      &m_trk_unknown);
@@ -135,6 +136,7 @@ void EventSaverFlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSet
     m_trk_q.clear();
     m_trk_chi2.clear();
     m_trk_nstub.clear();
+    m_trk_stubPtCons.clear();
     m_trk_genuine.clear();
     m_trk_loose.clear();
     m_trk_unknown.clear();
@@ -214,6 +216,7 @@ void EventSaverFlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSet
         float tmp_trk_z0   = iterL1Track->getPOCA(m_L1Tk_nparams).z(); //cm
         float tmp_trk_chi2 = iterL1Track->getChi2(m_L1Tk_nparams);
         int tmp_trk_q      = iterL1Track->getRInv()>0? 1.: -1.;
+        float tmp_trk_stubPtCons   = iterL1Track->getStubPtConsistency(m_L1Tk_nparams);
         unsigned int tmp_trk_nstub = iterL1Track->getStubRefs().size();
 
         float tmp_trk_d0 = -999;
@@ -244,6 +247,7 @@ void EventSaverFlatNtuple::analyze(const edm::Event& iEvent, const edm::EventSet
         m_trk_d0.push_back(tmp_trk_d0);
         m_trk_chi2 .push_back(tmp_trk_chi2);
         m_trk_nstub.push_back(tmp_trk_nstub);
+        m_trk_stubPtCons.push_back(tmp_trk_stubPtCons);
         m_trk_genuine.push_back(tmp_trk_genuine);
         m_trk_loose.push_back(tmp_trk_loose);
         m_trk_unknown.push_back(tmp_trk_unknown);
