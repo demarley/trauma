@@ -169,10 +169,8 @@ class DeepLearningPlotter(object):
             for target in self.targets:
                 hist = Histogram2D()
 
-                print xfeature,yfeature
                 xbins = self.variable_labels[xfeature].binning
                 ybins = self.variable_labels[yfeature].binning
-                print xbins,ybins
 
                 hist.colormap = 'default'
                 hist.colorbar['title'] = "Events"

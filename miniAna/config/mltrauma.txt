@@ -1,7 +1,7 @@
 framework keras
 runTraining True
 runInference False
-hep_data /data/demarley/correlator/trauma/03Sep2018/data.root
+hep_data /data/demarley/correlator/trauma/03Sep2018/data_bmtf.root
 treename features
 output_path /data/demarley/correlator/trauma/DNN
 nHiddenLayers 3

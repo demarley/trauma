@@ -28,6 +28,7 @@ Expandable: Do 'testing' phase later than training phase
             Diagnostics post-training phase
             Different model (PyTorch)
 """
+import sys
 import json
 import util
 import datetime
@@ -155,8 +156,6 @@ class DeepLearning(object):
         self.load_hep_data()
         self.build_model()
 
-        if self.runDiagnostics: self.diagnostics(pre=True)
-
         self.train_model()      # this also saves the model in case errors occur while plotting evaluations
 
         # save plots of the performance
@@ -249,8 +248,8 @@ class DeepLearning(object):
 
         # Make ROC curve from test sample
         fpr,tpr,_ = roc_curve( Y_test, test_predictions )
-        self.fpr.append(fpr)
-        self.tpr.append(tpr)
+        self.fpr = fpr
+        self.tpr = tpr
 
         # -- store test/train data from each k-fold as histograms (to compare later)
         h_tests  = dict( (n,ROOT.TH1D("test_"+n,"test_"+n,10,0,1)) for n,v in self.targets.iteritems() )
@@ -315,6 +314,7 @@ class DeepLearning(object):
         # set up plotter and save plots of the features and model architecture
         self.plotter.initialize(self.df,self.targets)
         if self.runDiagnostics: self.diagnostics(pre=True)
+        sys.exit(1)
 
         return
 
@@ -404,7 +404,7 @@ class DeepLearning(object):
             self.msg_svc.INFO("DL : -- post-training :: ROC")
             self.plotter.ROC(self.fpr,self.tpr,self.accuracy)  # ROC curve for signal vs background
             self.msg_svc.INFO("DL : -- post-training :: History")
-            self.plotter.loss_history(self.histories) # loss as a function of epoch
+            self.plotter.history(self.histories) # loss as a function of epoch
 
         return
 
