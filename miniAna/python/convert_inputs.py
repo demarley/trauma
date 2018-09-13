@@ -71,17 +71,16 @@ for line in tfile:
 
     if line.startswith("BX"):
         eventNumber = int(values[3])-1
-        phisector   = "{0:b}".format(int(values[7]))
+        phisector   = format(int(values[7]),'05b')  # always 5 bits
     else:
         # track properties
-        values2 = line.split(' ')
         rinv    = values[1]
         phi     = values[2]
         sinhEta = values[3]
         z0      = values[4]
-    
+
         event = events[eventNumber]
-    
+
         tk = TkMu()
         tk.rinv    = rinv
         tk.sinhEta = sinhEta
@@ -89,7 +88,7 @@ for line in tfile:
         tk.z0      = z0
         tk.sector  = phisector
         event.tracks.append(tk)
-    
+
         events[eventNumber] = event
 
 
