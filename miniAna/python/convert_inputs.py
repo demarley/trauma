@@ -2,7 +2,6 @@
 Convert input muon and track data files to same format as PF group
 
 Tracks: 96 bits
-
 N_BITS_TRACK_PHI   = 19
 N_BITS_TRACK_INVPT = 15
 N_BITS_TRACK_ETA   = 14
@@ -13,6 +12,9 @@ Muons: 32 bits
 N_BITS_MUON_PT  = 9;
 N_BITS_MUON_ETA = 9;
 N_BITS_MUON_PHI = 10;
+
+To run, from the 'miniAna/' directory:
+$ python python/convert_inputs.py
 """
 
 def writeHeader():
@@ -53,9 +55,9 @@ class Event(object):
         self.muons  = []
 
 
-tfile = file2list("../hls-modules/data/CleanTracksAll_binary.dat")
-mfile = file2list("../hls-modules/data/hw_muon_data.dat")
-ofile = open("outfile.txt","w")
+tfile = file2list("data/CleanTracksAll_binary.dat")
+mfile = file2list("data/hw_muon_data.dat")
+ofile = open("data/outfile.txt","w")
 
 
 N_MAX    = 38
