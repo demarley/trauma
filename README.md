@@ -1,19 +1,21 @@
 # Trauma
 
-**Tra**ck-**μ** **Ma**tching with machine learning.
+**Tra**ck-**μ** **M**atching **A**lgorithms
 
-_Given an L1 TT Tracklet and an L1 regional muon candidate, classify the two 
-as 'matched' or 'un-matched'._
+Given an L1 TT Tracklet and an L1 regional muon candidate, classify the two as:
+1. Signal (prompt) muon + signal track
+2. Signal (prompt) muon + fake track
+3. Displaced muon + fake track
+4. Fake muon + fake track
 
 ## Getting Started
 
 Directory | ABOUT
 --------- | -----
 production/ | Producing flat ntuples from EDM ntuples
-training/   | Producing flat ntuples to be used in training (each 'event' represents a track-muon pair)
-inference/  | Inference in software with Lightweight NN
-fpga/       | Inference in firmware with hls4ml
+miniAna/    | Producing flat ntuples to be used in training (each 'event' represents a track-muon pair)
 
+_TBA: Instructions for inference in c++ environment (with lwtnn) and hls4ml._
 
 ## Resources
 This list is not exhaustive, but points to some places I referenced for getting started.
@@ -30,6 +32,7 @@ Machine Learning:
 - [Keras](https://keras.io/)
 - [Tensorflow](https://www.tensorflow.org/)
 - [hls4ml](https://github.com/hls-fpga-machine-learning/hls4ml)
+- [Lightweight NN (lwtnn)](https://github.com/lwtnn/lwtnn)
 
 ## Questions or comments
 
