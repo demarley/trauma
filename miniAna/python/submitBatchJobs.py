@@ -19,7 +19,7 @@ where <batchConfig.txt> contains configuration options
 """
 import os
 import sys
-import util
+import utils
 import time
 import commands
 from batch.batchSubmission import BatchSubmission
@@ -27,16 +27,16 @@ from batch.batchSubmission import BatchSubmission
 
 # setup config
 config = sys.argv[1]
-cfg    = util.read_config(config)
+cfg    = utils.read_config(config)
 
 # reset boolean values
-cfg['test']    = util.str2bool( cfg['test'] )
-cfg['submit']  = util.str2bool( cfg['submit'] )
-cfg['verbose'] = util.str2bool( cfg['verbose'] )
+cfg['test']    = utils.str2bool( cfg['test'] )
+cfg['submit']  = utils.str2bool( cfg['submit'] )
+cfg['verbose'] = utils.str2bool( cfg['verbose'] )
 
 # set 'global' options
 date      = time.strftime("%d%b%Y") if cfg['date']=='today' else cfg['date']
-cmaConfig = util.read_config( cfg['config'] )                             # get the selection from the cmaConfig file
+cmaConfig = utils.read_config( cfg['config'] )                             # get the selection from the cmaConfig file
 
 
 # loop over datasets to process, e.g., ttbar or qcd
