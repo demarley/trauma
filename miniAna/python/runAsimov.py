@@ -16,11 +16,22 @@ $ python python/runDeepLearning.py config/mlconfig.txt
 import os
 import sys
 import json
-import util
-from config import Config
 from collections import Counter
 from time import strftime,localtime
-from deepLearning import DeepLearning
+
+# Add Asimov and hepPlotter to pythonpath
+cwd = os.getcwd()
+hpd = cwd.rstrip("miniAna")+"/asimov/python/"
+if hpd not in sys.path:
+    sys.path.insert(0,hpd)
+hpd = cwd.rstrip("miniAna")+"/hepPlotter/python/"
+if hpd not in sys.path:
+    sys.path.insert(0,hpd)
+
+import plotlabels as plb
+import util
+from training import Training
+from config import Config
 
 
 print
